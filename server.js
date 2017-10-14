@@ -17,33 +17,43 @@
 import fs from "fs";
 import http from "http";
 import path from "path";
+import cors from "cors";
 import methods from "methods";
 import express from "express";
+import passport from "passport";
+import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import session from "express-session";
-import cors from "cors";
 import errorhandler from "errorhandler";
 
+const app = express();
 const nodeEnv = process.env.NODE_ENV || "development";
 const isProduction = nodeEnv === "production";
 const isDevelopment = nodeEnv === "development";
 const appConfig = require("./config/env.json")[nodeEnv];
+const mongooseHandler = require("./app/config/mongoose");
 
-const app = express();
 app.use(cors());
 app.use(require("morgan")("dev"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+if(isDevelopment) { mongoose.set("debug", true); }
+mongoose.Promise = global.Promise;
+mongoose.connect(appConfig["MONGO_URI"],
+  appConfig["MONGO_OPTIONS"], mongooseHandler);
+
 app.use(require("method-override")());
 app.use(session({ secret: "addressbookapi", cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
 if(!isProduction) { app.use(errorhandler()); }
 
+require("./app/models/account");
+require("./app/config/passport");
 app.use(require("./app/routes"));
 
 /// Error 404 handler
 app.use((req, res, next) => {
-  res.status(404).end("Not Found");
+  res.status(404).json({ status: "error", "errors": { error: "Not Found" } });
   next();
 });
 
@@ -53,13 +63,14 @@ if (!isProduction) {
     console.log(err.stack);
 
     res.status(err.status || 500);
-    res.json({ "errors": { error: err, message: err.message }});
+    res.json({ status: "error", "errors": { error: err, message: err.message }});
   });
 }
 
 // Production Error Handler
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
+  res.json({ status: "error", "errors": { error: err } })
 });
 
 // Start server

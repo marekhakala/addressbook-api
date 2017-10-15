@@ -21,18 +21,18 @@ const Account = mongoose.model("Account");
 import auth from "../../auth";
 
 router.get("/account", auth.required, (req, res, next) => {
-  Account.findById(req.payload.id).then((account) => {
-    if(!account) {
+  Account.findById(req.payload.id).then(account => {
+    if(account == null) {
       return res.sendStatus(401);
     }
 
-    return res.json({ account: account.toAuthJSON() });
+    return res.status(200).json({ account: account.toAuthJSON() });
   }).catch(next);
 });
 
 router.put("/account", auth.required, (req, res, next) => {
   Account.findById(req.payload.id).then((account) => {
-    if(!account) {
+    if(account == null) {
       return res.sendStatus(401);
     }
 
@@ -43,7 +43,8 @@ router.put("/account", auth.required, (req, res, next) => {
 
       if(!account.validPassword(req.body.account.currentPassword)) {
         return res.status(422)
-        .json({ status: "error", errors: { currentPassword: "Current password isn't correct." }});
+        .json({ status: "error",
+          errors: { currentPassword: "Current password isn't correct." }});
       }
 
       if(req.body.account.fullname != null) {
@@ -69,11 +70,13 @@ router.put("/account", auth.required, (req, res, next) => {
       }
 
       return account.save().then(() => {
-        return res.status(200).json({ status: "updated", account: account.toAuthJSON() });
+        return res.status(200).json({ status: "updated",
+         account: account.toAuthJSON() });
       });
     } else {
       return res.status(422)
-      .json({ status: "error", errors: { currentPassword: "Can't be blank." }});
+      .json({ status: "error",
+        errors: { currentPassword: "Can't be blank." }});
     }
   }).catch(next);
 });
@@ -103,14 +106,15 @@ router.post("/accounts/signin", (req, res, next) => {
     return res.status(422).json({ status: "error", errors: errorsHash });
   }
 
-  passport.authenticate("local", { session: false }, (err, account, info) => {
+  passport.authenticate("local", { session: false },
+    (err, account, info) => {
     if(err) {
       return next(err);
     }
 
     if(account) {
       account.token = account.generateJWT();
-      return res.json({ status: "ok", account: account.toAuthJSON() });
+      return res.status(200).json({ status: "ok", account: account.toAuthJSON() });
     } else {
       return res.status(422).json(info);
     }
@@ -155,7 +159,8 @@ router.post("/accounts", (req, res, next) => {
   account.setPassword(req.body.account.password);
 
   account.save().then(() => {
-    return res.status(201).json({ status: "created", account: account.toAuthJSON() });
+    return res.status(201).json({ status: "created",
+     account: account.toAuthJSON() });
   }).catch(next);
 });
 

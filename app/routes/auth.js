@@ -18,14 +18,16 @@ import jwt from "express-jwt";
 import { secret as secret } from "../config";
 
 function getTokenFromHeader(req) {
-  if (req.headers.authorization && req.headers.authorization.split(" ")[0] === "Token") {
+  if (req.headers.authorization
+    && req.headers.authorization.split(" ")[0] === "Token") {
     return req.headers.authorization.split(" ")[1];
   }
   return null;
 }
 
 const auth = {
-  required: jwt({ secret: secret, userProperty: "payload", getToken: getTokenFromHeader }),
+  required: jwt({ secret: secret, userProperty: "payload",
+    getToken: getTokenFromHeader }),
   optional: jwt({ secret: secret, userProperty: "payload",
     credentialsRequired: false, getToken: getTokenFromHeader })
 };

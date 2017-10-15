@@ -37,3 +37,4 @@ node_modules
 
 # Config directory
 config/env.json
+config/serviceAccountKey.json

@@ -18,6 +18,7 @@ import express from "express";
 const router = express.Router();
 
 router.use("/", require("./accounts"));
+router.use("/contacts", require("./contacts"));
 
 router.use((err, req, res, next) => {
   if(err.name === "ValidationError") {

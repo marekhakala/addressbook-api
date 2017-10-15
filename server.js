@@ -25,12 +25,14 @@ import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import session from "express-session";
 import errorhandler from "errorhandler";
+import firebaseAdmin from "firebase-admin";
 
 const app = express();
 const nodeEnv = process.env.NODE_ENV || "development";
 const isProduction = nodeEnv === "production";
 const isDevelopment = nodeEnv === "development";
 const appConfig = require("./config/env.json")[nodeEnv];
+const serviceAccount = require("./config/serviceAccountKey.json");
 const mongooseHandler = require("./app/config/mongoose");
 
 app.use(cors());
@@ -42,6 +44,9 @@ if(isDevelopment) { mongoose.set("debug", true); }
 mongoose.Promise = global.Promise;
 mongoose.connect(appConfig["MONGO_URI"],
   appConfig["MONGO_OPTIONS"], mongooseHandler);
+
+firebaseAdmin.initializeApp({ credential: firebaseAdmin.credential.cert(serviceAccount),
+  databaseURL: appConfig["FIREBASE_URL"] });
 
 app.use(require("method-override")());
 app.use(session({ secret: "addressbookapi", cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));

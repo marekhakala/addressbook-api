@@ -22,6 +22,73 @@ const router = require("express").Router();
 const Account = mongoose.model("Account");
 import auth from "../../auth";
 
+/**
+ * @swagger
+ * definitions:
+ *  Contact:
+ *    type: object
+ *    properties:
+ *      id:
+ *        type: integer
+ *        description: Contact ID
+ *      fullname:
+ *        type: string
+ *        description: First and last name
+ *      phone:
+ *        type: string
+ *        description: Phone number
+ *      email:
+ *        type: string
+ *        description: Email address
+ */
+
+/**
+ * @swagger
+ * /v1/contacts:
+ *  post:
+ *    tags:
+ *      - Contacts
+ *    description: Add a contact
+ *    produces:
+ *      - application/json
+ *    security:
+ *      - Jwt: []
+ *    parameters:
+ *      - name: contact[fullname]
+ *        description: First and last name
+ *        in: body
+ *        type: string
+ *        required: true
+ *      - name: contact[email]
+ *        description: Email address
+ *        in: body
+ *        type: string
+ *      - name: contact[phone]
+ *        description: Phone number
+ *        in: body
+ *        type: string
+ *    responses:
+ *      201:
+ *        description: Contact
+ *        schema:
+ *          type: object
+ *          properties:
+ *            status:
+ *              type: string
+ *            contact:
+ *              type: object
+ *              $ref: "#/definitions/Contact"
+ *      401:
+ *        description: Unauthorized
+ *        schema:
+ *          type: object
+ *          $ref: "#/definitions/ErrorMessage"
+ *      422:
+ *        description: Unprocessable Entity
+ *        schema:
+ *          type: object
+ *          $ref: "#/definitions/ErrorMessage"
+ */
 router.post("/", auth.required, (req, res, next) => {
   Account.findById(req.payload.id).then(user => {
     if (user == null) {

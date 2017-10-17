@@ -26,6 +26,8 @@ import bodyParser from "body-parser";
 import session from "express-session";
 import errorhandler from "errorhandler";
 import firebaseAdmin from "firebase-admin";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
 
 const app = express();
 const nodeEnv = process.env.NODE_ENV || "development";
@@ -45,16 +47,38 @@ mongoose.Promise = global.Promise;
 mongoose.connect(appConfig["MONGO_URI"],
   appConfig["MONGO_OPTIONS"], mongooseHandler);
 
-firebaseAdmin.initializeApp({ credential: firebaseAdmin.credential.cert(serviceAccount),
+firebaseAdmin.initializeApp({ credential:
+  firebaseAdmin.credential.cert(serviceAccount),
   databaseURL: appConfig["FIREBASE_URL"] });
 
 app.use(require("method-override")());
-app.use(session({ secret: "addressbookapi", cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
+app.use(session({ secret: "addressbookapi", cookie: { maxAge: 60000 },
+  resave: false, saveUninitialized: false }));
 if(!isProduction) { app.use(errorhandler()); }
 
 require("./app/models/account");
 require("./app/config/passport");
 app.use(require("./app/routes"));
+
+const docsPath = "/api-docs";
+const docsJsonPath = docsPath + ".json";
+const swaggerOptions = require("./app/config/swagger");
+const swaggerSpec = swaggerJSDoc(swaggerOptions);
+const swaggerUiHandler = swaggerUi.setup(swaggerSpec);
+
+app.get(docsJsonPath, (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
+app.use(docsPath, swaggerUi.serve, (req, res, next) => {
+  if (!req.query.url) {
+    let protocol = (req.protocol === "https") ? "https" : "http";
+    res.redirect(`${docsPath}?url=${protocol}://${req.headers.host}${docsJsonPath}`);
+  } else {
+    swaggerUiHandler(req, res, next);
+  }
+});
 
 /// Error 404 handler
 app.use((req, res, next) => {

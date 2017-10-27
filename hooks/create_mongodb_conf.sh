@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo -e "{\n\"development\": {\n\"FIREBASE_URL\": \"https://$FIREBASE_PROJECT_ID.firebaseio.com/\", \n\"MONGO_URI\": \"mongodb://travis_dev:dev@127.0.0.1/addressbookapi_development\", \n\"MONGO_OPTIONS\": { \"db\": { \"safe\": true } }, \n\"PORT\" : 3000 \n},\n\"test\": {\n\"FIREBASE_URL\": \"https://$FIREBASE_PROJECT_ID.firebaseio.com/\",\n\"MONGO_URI\":\"mongodb://travis_test:test@127.0.0.1/addressbookapi_test\", \n\"MONGO_OPTIONS\": { \"db\": { \"safe\": true } }, \n\"PORT\" : 8000 \n},\n\"production\": {\n\"FIREBASE_URL\":\"https://$FIREBASE_PROJECT_ID.firebaseio.com/\",\n\"MONGO_URI\":\"mongodb://travis_prod:prod@127.0.0.1/addressbookapi\", \n\"MONGO_OPTIONS\": { \"db\": { \"safe\": true } }, \n\"PORT\" : 3000 \n} \n}" > ./config/env.json

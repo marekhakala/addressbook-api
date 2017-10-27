@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+- stable
+services:
+- mongodb
+before_script:
+- sleep 15
+- mongo addressbookapi_test --eval 'db.createUser({user:"travis_test",pwd:"test",roles:["readWrite"]});'
+- "./hooks/create_mongodb_conf.sh"
+- openssl aes-256-cbc -K $encrypted_664998c36519_key -iv $encrypted_664998c36519_iv -in serviceAccountKey.json.enc -out ./config/serviceAccountKey.json -d
